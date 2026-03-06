@@ -3,7 +3,9 @@ import axios from "axios";
 import { User, UserSearchResult, Tweet, LoadTweetResponse, AccountMonitoringEntry, KeywordSearchEntry } from "../types";
 
 const API_BASE_URL =
-  process.env.REACT_APP_API_URL || "http://localhost:8080/api/v1";
+  (typeof window !== "undefined" && (window as any).__API_BASE_URL__) ||
+  process.env.REACT_APP_API_URL ||
+  "http://localhost:8080/api/v1";
 
 // Create axios instance with base configuration
 const apiClient = axios.create({

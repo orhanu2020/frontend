@@ -35,11 +35,7 @@ node -v && npm -v
    npm install
    ```
 
-2. **Set the API URL** – copy `.env.example` to `.env` and set your backend URL. **If frontend and backend are on the same VPS, use the VPS IP or domain (e.g. `http://YOUR_VPS_IP:8080/api/v1`), not `localhost`**, or the browser will get "Network Error" when searching:
-   ```bash
-   cp .env.example .env
-   # Edit .env: REACT_APP_API_URL=http://YOUR_VPS_IP:8080/api/v1
-   ```
+2. **Set the API URL** – on the VPS, edit **`public/config.js`** and set `window.__API_BASE_URL__ = 'http://YOUR_VPS_IP:8080/api/v1';` (use your VPS IP). No restart needed; just refresh the browser. Or use `.env` with `REACT_APP_API_URL=...` and restart the app.
 
 3. **Start the app** so it listens on all interfaces (not only localhost):
    ```bash
@@ -60,17 +56,21 @@ To stop: `pm2 stop frontend`. To view logs: `pm2 logs frontend`.
 
 If you see **"Tweet search: Network Error; User search: Network Error"**, the browser cannot reach your backend. The frontend runs in the **user’s browser**, so API requests are made from the user’s machine. If `REACT_APP_API_URL` is `http://localhost:8080/api/v1`, the browser tries to call **your own PC**, not the VPS.
 
-**Fix:**
+**Fix (easiest – no restart needed):**
 
-1. **Use the VPS address in `.env`**, not `localhost`:
-   - The file **must** be named **`.env`** (with the leading dot), in the frontend project root. Names like `environment` or `env` are **not** loaded by Create React App.
+1. **Edit `public/config.js` on the VPS** and set your backend URL. This file is loaded in the browser on every page load, so **no restart or rebuild** is needed:
+   ```javascript
+   window.__API_BASE_URL__ = 'http://75.119.146.174:8080/api/v1';   // use your VPS IP
+   ```
+   Replace `75.119.146.174` with your VPS IP (or domain). Save the file and **refresh the browser** (Ctrl+Shift+R). The app will then call the backend on the VPS.
+
+**Alternative (using `.env`):**
+
+2. Use the VPS address in **`.env`** (file must be named exactly `.env` in the project root):
    ```bash
-   # On the VPS, create or edit .env (replace with your VPS IP or domain)
    REACT_APP_API_URL=http://YOUR_VPS_IP:8080/api/v1
    ```
-   Example: if your VPS IP is `75.119.146.174`, use `http://75.119.146.174:8080/api/v1`.
-
-2. **Restart the frontend** so it picks up the new env. CRA only reads `.env` at startup (e.g. `pm2 restart frontend` or stop and run `HOST=0.0.0.0 npm start` again). If you still see `localhost:8080` in the browser console or Network tab, the app wasn’t restarted after changing `.env`.
+   Then **restart the frontend** (e.g. `pm2 restart frontend`); CRA only reads `.env` at startup.
 
 3. **Ensure the backend listens on all interfaces** (see below).
 
